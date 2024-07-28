@@ -2,10 +2,13 @@ import { App } from '../wolf.js';
 
 import "./src/layout.js";
 import "./src/not-found.js";
+import "./src/home.js";
+import "./src/about.js";
 
 
 App.setRoutes({
-    "/": "Home",
+    "/": "home",
+    "/about": "about",
 });
 
 App.setLayout("layout");

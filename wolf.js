@@ -143,7 +143,15 @@ const App = {
     `,
 
     setRoutes(routeMap) {
-        this.routes = routeMap;
+        let RouteMap = {};
+
+        for (let route in routeMap) {
+            const componentName = routeMap[route];
+            const Component = window.customElements.get("wolf-component-" + componentName);
+            RouteMap[route] = () => new Component().shadowRoot.innerHTML;
+        }
+
+        this.routes = RouteMap
     },
 
     setLayout(layoutComponent = "wolf-layout") {
@@ -199,7 +207,7 @@ class WolfSlot extends HTMLElement {
     }
 
     connectedCallback() {
-        this.shadowRoot.innerHTML = currentComponent ? html`<${currentComponent}></${currentComponent}>`
+        this.shadowRoot.innerHTML = App.currentPage ? App.currentPage()
         : App.errorPage;
 
         // this.shadowRoot.innerHTML = `<h2>Hello</h2>`;
