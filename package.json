@@ -1,0 +1,26 @@
+{
+  "name": "wolf",
+  "version": "0.0.0",
+  "description": "A blazingly fast easy to use framework",
+  "main": "wolf.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "Wolf"
+  },
+  "keywords": [
+    "Web",
+    "JavaScript",
+    "TypeScript",
+    "Framework",
+    "fast",
+    "easy",
+    "new",
+    "good",
+    "powerful"
+  ],
+  "author": "HannesScript",
+  "license": "MIT"
+}
