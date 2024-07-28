@@ -1,26 +1,5 @@
-class Component extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: "open" });
-        this.shadowRoot.innerHTML = renderFn({ ...this.attributes, children: this.children });
-    }
-
-    connectedCallback() {
-        this.shadowRoot.innerHTML = html`<${currentComponent}></${currentComponent}>`;
-    }
-}
-
-class WolfSlot extends HTMLElement {
-    constructor() {
-        super();
-    }
-
-    connectedCallback() {
-        this.shadowRoot.innerHTML = `<${currentComponent}></${currentComponent}>`;
-    }
-}
-
-window.customElements.define("wolf-slot", WolfSlot);
+export let html = htmlString => htmlString;
+export let css = cssString => cssString;
 
 const hooks = new Map();
 let currentComponent = null;
@@ -158,6 +137,10 @@ const App = {
     currentPage: null,
     mountPoint: null,
     vdom: null,
+    errorPage: html`
+        <h1>404</h1>
+        <p>Page not found</p>
+    `,
 
     setRoutes(routeMap) {
         this.routes = routeMap;
@@ -165,6 +148,11 @@ const App = {
 
     setLayout(layoutComponent = "wolf-layout") {
         this.layoutComponent = "wolf-component-" + layoutComponent;
+    },
+
+    setNotFound(notFoundComponent) {
+        const NotFound = window.customElements.get("wolf-component-" + notFoundComponent);
+        this.errorPage = new NotFound()?.shadowRoot.innerHTML;
     },
 
     mount(selector) {
@@ -182,7 +170,7 @@ const App = {
         const routeComponent = this.routes[path];
         this.currentPage = () => routeComponent();
 
-        const Layout = window.customElements.get("wolf-component-" + this.layoutComponent);
+        const Layout = window.customElements.get(this.layoutComponent);
         this.mountPoint.querySelector("wolf-app").innerHTML = new Layout().shadowRoot.innerHTML;
 
         this.handleLinks();
@@ -202,3 +190,22 @@ const App = {
         }
     }
 };
+
+class WolfSlot extends HTMLElement {
+    constructor() {
+        super();
+
+        this.attachShadow({ mode: "open" });
+    }
+
+    connectedCallback() {
+        this.shadowRoot.innerHTML = currentComponent ? html`<${currentComponent}></${currentComponent}>`
+        : App.errorPage;
+
+        // this.shadowRoot.innerHTML = `<h2>Hello</h2>`;
+    }
+}
+
+window.customElements.define("wolf-slot", WolfSlot);
+
+export { component, state, App };

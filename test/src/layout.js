@@ -1,11 +1,11 @@
-import { component } from "../../wolf.js";
+import { component, html } from "../../wolf.js";
 
 
 component("layout", () => {
-    return `
+    return html`
         <h1>Wolf Test Page</h1>
         <main>
-            <Slot></Slot>
+            <wolf-slot></wolf-slot>
         </main>
     `;
 });
