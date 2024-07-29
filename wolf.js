@@ -1,6 +1,38 @@
 export let html = htmlString => htmlString;
 export let css = cssString => cssString;
 
+class Component extends HTMLElement {
+    constructor() {
+        super();
+        this.state = {};
+        this.render();
+    }
+
+    setState(newState) {
+        this.state = { ...this.state, ...newState };
+        this.update();
+    }
+
+    render() {
+        this.innerHTML = this.template();
+    }
+
+    update() {
+        const newVNode = this.template();
+        const patches = diff(newVNode, this.vdom);
+        patch(this, patches);
+        this.vdom = newVNode;
+    }
+
+    connectedCallback() {
+        this.update();
+    }
+
+    template() {
+        return html`<${currentComponent}></${currentComponent}>`;
+    }
+}
+
 const hooks = new Map();
 let currentComponent = null;
 let currentHookIndex = 0;
@@ -9,28 +41,23 @@ const component = (Name, renderFn) => {
     currentComponent = renderFn;
     currentHookIndex = 0;
 
-    class Component extends HTMLElement {
+    class CustomComponent extends Component {
         constructor() {
             super();
-            this.attachShadow({ mode: "open" });
-            this.shadowRoot.innerHTML = renderFn({ ...this.attributes, children: this.children });
+            this.state = {};
         }
 
-        connectedCallback() {
-            this.shadowRoot.innerHTML = html`<${currentComponent}></${currentComponent}>`;
+        template() {
+            return renderFn({ ...this.attributes, children: this.children, state: this.state });
         }
     }
 
-    window.customElements.define("wolf-component-" + Name, Component);
+    window.customElements.define("cmpt-" + Name, CustomComponent);
     currentComponent = null;
-    return Component;
+    return CustomComponent;
 };
 
 const state = (initialValue) => {
-    if (!currentComponent) {
-        throw new Error("state() can only be called inside a component function");
-    }
-
     const componentId = currentComponent;
     if (!hooks.has(componentId)) {
         hooks.set(componentId, []);
@@ -54,6 +81,37 @@ const state = (initialValue) => {
     return { get: getState, set: setState };
 };
 
+const createDomElement = (vNode) => {
+    if (typeof vNode === 'string') {
+        return document.createTextNode(vNode);
+    }
+
+    const element = document.createElement(vNode.tag);
+
+    // Ensure vNode.props is an object
+    const props = vNode.props || {};
+
+    // Set attributes
+    Object.keys(props).forEach(key => {
+        if (key.startsWith("on")) {
+            element[key.toLowerCase()] = props[key];
+        } else {
+            element.setAttribute(key, props[key]);
+        }
+    });
+
+    // Ensure vNode.children is an array
+    const children = vNode.children || [];
+
+    // Append children
+    children.forEach(child => {
+        element.appendChild(createDomElement(child));
+    });
+
+    return element;
+};
+
+// Existing code
 const diff = (newVNode, oldVNode) => {
     if (!oldVNode) {
         return { type: 'CREATE', newVNode };
@@ -141,26 +199,25 @@ const App = {
         <h1>404</h1>
         <p>Page not found</p>
     `,
-
     setRoutes(routeMap) {
         let RouteMap = {};
 
         for (let route in routeMap) {
             const componentName = routeMap[route];
-            const Component = window.customElements.get("wolf-component-" + componentName);
-            RouteMap[route] = () => new Component().shadowRoot.innerHTML;
+            const Component = window.customElements.get("cmpt-" + componentName);
+            RouteMap[route] = () => new Component().innerHTML;
         }
 
-        this.routes = RouteMap
+        this.routes = RouteMap;
     },
 
     setLayout(layoutComponent = "wolf-layout") {
-        this.layoutComponent = "wolf-component-" + layoutComponent;
+        this.layoutComponent = "cmpt-" + layoutComponent;
     },
 
     setNotFound(notFoundComponent) {
-        const NotFound = window.customElements.get("wolf-component-" + notFoundComponent);
-        this.errorPage = new NotFound()?.shadowRoot.innerHTML;
+        const NotFound = window.customElements.get("cmpt-" + notFoundComponent);
+        this.errorPage = new NotFound()?.innerHTML;
     },
 
     mount(selector) {
@@ -179,7 +236,7 @@ const App = {
         this.currentPage = () => routeComponent();
 
         const Layout = window.customElements.get(this.layoutComponent);
-        this.mountPoint.querySelector("wolf-app").innerHTML = new Layout().shadowRoot.innerHTML;
+        this.mountPoint.querySelector("wolf-app").innerHTML = new Layout().innerHTML;
 
         this.handleLinks();
     },
@@ -202,15 +259,10 @@ const App = {
 class WolfSlot extends HTMLElement {
     constructor() {
         super();
-
-        this.attachShadow({ mode: "open" });
     }
 
     connectedCallback() {
-        this.shadowRoot.innerHTML = App.currentPage ? App.currentPage()
-        : App.errorPage;
-
-        // this.shadowRoot.innerHTML = `<h2>Hello</h2>`;
+        this.innerHTML = App.currentPage ? App.currentPage() : App.errorPage;
     }
 }
 

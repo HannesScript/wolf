@@ -1,4 +1,4 @@
-import { component, html } from "../../wolf.js";
+import { component, html } from "../../../wolf.js";
 
 component("not-found", () => {
     return html`
