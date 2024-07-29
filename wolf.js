@@ -1,4 +1,5 @@
 const eventHandlers = [];
+const states = new Map();
 
 export function html(strings, ...values) {
     return strings.reduce((result, string, i) => {
@@ -17,6 +18,7 @@ class Component extends HTMLElement {
     constructor() {
         super();
         this.state = {};
+        this.vdom = this.template();
         this.render();
     }
 
@@ -70,28 +72,36 @@ const component = (Name, renderFn) => {
     return CustomComponent;
 };
 
-const state = (initialValue) => {
-    const componentId = currentComponent;
-    if (!hooks.has(componentId)) {
-        hooks.set(componentId, []);
+const state = {
+    set(state, value) {
+        if (!states.has(state)) {
+            console.warn(`State ${state} not found`);
+            return false;
+        }
+        states.set(state, value);
+        App.update();
+    },
+
+    get(state) {
+        if (!states.has(state)) {
+            console.warn(`State ${state} not found`);
+            return false;
+        }
+        return states.get(state);
+    },
+
+    create(state, initialValue) {
+        if (states.has(state)) {
+            console.warn(`State ${state} already exists`);
+            return;
+        }
+        states.set(state, initialValue);
+    },
+
+    delete(state) {
+        if (!states.has(state)) throw new Error(`State ${state} not found`);
+        states.delete(state);
     }
-
-    const hookArray = hooks.get(componentId);
-
-    if (hookArray.length <= currentHookIndex) {
-        hookArray.push(initialValue);
-    }
-
-    const stateIndex = currentHookIndex;
-
-    const getState = () => hookArray[stateIndex];
-    const setState = newValue => {
-        hookArray[stateIndex] = newValue;
-        requestAnimationFrame(App.update); // Ensures update is called only once per frame
-    };
-
-    currentHookIndex++;
-    return { get: getState, set: setState };
 };
 
 const createDomElement = (vNode, eventHandlers = []) => {
@@ -125,7 +135,6 @@ const createDomElement = (vNode, eventHandlers = []) => {
     return element;
 };
 
-// Existing code
 const diff = (newVNode, oldVNode) => {
     if (!oldVNode) {
         return { type: 'CREATE', newVNode };
