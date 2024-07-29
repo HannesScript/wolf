@@ -1,4 +1,16 @@
-export let html = htmlString => htmlString;
+const eventHandlers = [];
+
+export function html(strings, ...values) {
+    return strings.reduce((result, string, i) => {
+        const value = values[i];
+        if (typeof value === "function") {
+            eventHandlers.push(value);
+            return result + string + `__event__${eventHandlers.length - 1}`;
+        }
+        return result + string + (value !== undefined ? value : "");
+    }, "");
+}
+
 export let css = cssString => cssString;
 
 class Component extends HTMLElement {
@@ -15,6 +27,7 @@ class Component extends HTMLElement {
 
     render() {
         this.innerHTML = this.template();
+        attachEventHandlers(this);
     }
 
     update() {
@@ -81,7 +94,7 @@ const state = (initialValue) => {
     return { get: getState, set: setState };
 };
 
-const createDomElement = (vNode) => {
+const createDomElement = (vNode, eventHandlers = []) => {
     if (typeof vNode === 'string') {
         return document.createTextNode(vNode);
     }
@@ -94,7 +107,8 @@ const createDomElement = (vNode) => {
     // Set attributes
     Object.keys(props).forEach(key => {
         if (key.startsWith("on")) {
-            element[key.toLowerCase()] = props[key];
+            const eventIndex = parseInt(props[key].replace('__event__', ''), 10);
+            element[key.toLowerCase()] = eventHandlers[eventIndex];
         } else {
             element.setAttribute(key, props[key]);
         }
@@ -105,7 +119,7 @@ const createDomElement = (vNode) => {
 
     // Append children
     children.forEach(child => {
-        element.appendChild(createDomElement(child));
+        element.appendChild(createDomElement(child, eventHandlers));
     });
 
     return element;
@@ -188,6 +202,16 @@ const patch = (parent, patches, index = 0) => {
         }
     }
 };
+
+function attachEventHandlers(container) {
+    eventHandlers.forEach((handler, index) => {
+        const elements = container.querySelectorAll(`[onclick="__event__${index}"]`);
+        elements.forEach(element => {
+            element.onclick = handler;
+            element.removeAttribute("onclick"); // Clean up the placeholder
+        });
+    });
+}
 
 const App = {
     routes: {},
