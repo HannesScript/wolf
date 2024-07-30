@@ -1,5 +1,7 @@
 const eventHandlers = [];
 const states = new Map();
+const stateWatchers = new Map();
+const timesRendered = new Map();
 
 export function html(strings, ...values) {
     return strings.reduce((result, string, i) => {
@@ -9,7 +11,8 @@ export function html(strings, ...values) {
             return result + string + `__event__${eventHandlers.length - 1}`;
         }
         return result + string + (value !== undefined ? value : "");
-    }, "");
+    }, "")
+    .replaceAll("on:", "on")
 }
 
 export let css = cssString => cssString;
@@ -23,8 +26,11 @@ class Component extends HTMLElement {
     }
 
     setState(newState) {
-        this.state = { ...this.state, ...newState };
-        this.update();
+        const hasChanged = Object.keys(newState).some(key => this.state[key] !== newState[key]);
+        if (hasChanged) {
+            this.state = { ...this.state, ...newState };
+            this.update();
+        }
     }
 
     render() {
@@ -50,11 +56,13 @@ class Component extends HTMLElement {
 
 const hooks = new Map();
 let currentComponent = null;
+let currentComponentName = null;
 let currentHookIndex = 0;
 
 const component = (Name, renderFn) => {
     currentComponent = renderFn;
     currentHookIndex = 0;
+    currentComponentName = Name;
 
     class CustomComponent extends Component {
         constructor() {
@@ -75,16 +83,17 @@ const component = (Name, renderFn) => {
 const state = {
     set(state, value) {
         if (!states.has(state)) {
-            console.warn(`State ${state} not found`);
+            // console.warn(`State ${state} not found`);
             return false;
         }
         states.set(state, value);
+        notifyWatchers(state);
         App.update();
     },
 
     get(state) {
         if (!states.has(state)) {
-            console.warn(`State ${state} not found`);
+            // console.warn(`State ${state} not found`);
             return false;
         }
         return states.get(state);
@@ -92,7 +101,7 @@ const state = {
 
     create(state, initialValue) {
         if (states.has(state)) {
-            console.warn(`State ${state} already exists`);
+            // console.warn(`State ${state} already exists`);
             return;
         }
         states.set(state, initialValue);
@@ -134,6 +143,18 @@ const createDomElement = (vNode, eventHandlers = []) => {
 
     return element;
 };
+
+export function $onrender(callback, onNthRender = Infinity) {
+    if(!currentComponentName) {return;}
+    if(!timesRendered.has(currentComponentName)) {
+        timesRendered.set(currentComponentName, 0);
+    }
+
+    if(timesRendered.get(currentComponentName) <= onNthRender) {
+        callback();
+        timesRendered.set(currentComponentName, timesRendered.get(currentComponentName) + 1);
+    }
+}
 
 const diff = (newVNode, oldVNode) => {
     if (!oldVNode) {
@@ -216,8 +237,16 @@ function attachEventHandlers(container) {
     eventHandlers.forEach((handler, index) => {
         const elements = container.querySelectorAll(`[onclick="__event__${index}"]`);
         elements.forEach(element => {
-            element.onclick = handler;
             element.removeAttribute("onclick"); // Clean up the placeholder
+            element.onclick = (event) => {
+                const prevState = { ...container.state };
+                handler(event);
+                const newState = { ...container.state };
+                const hasChanged = Object.keys(newState).some(key => prevState[key] !== newState[key]);
+                if (hasChanged) {
+                    container.update();
+                }
+            };
         });
     });
 }
@@ -289,6 +318,25 @@ const App = {
     }
 };
 
+function notifyWatchers(state) {
+    if (stateWatchers.has(state)) {
+        stateWatchers.get(state).forEach(callback => callback());
+    }
+}
+
+/**
+ * @description When one of the dependencies changes, the callback is called
+ * @param {Function} callback 
+ * @param {Array} dependencies
+ */
+export function $watch(callback, dependencies) {
+    dependencies.forEach(dep => {
+        if (!stateWatchers.has(dep)) {
+            stateWatchers.set(dep, []);
+        }
+        stateWatchers.get(dep).push(callback);
+    });
+}
 class WolfSlot extends HTMLElement {
     constructor() {
         super();
