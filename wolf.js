@@ -80,6 +80,10 @@ const component = (Name, renderFn) => {
     return CustomComponent;
 };
 
+/**
+ * @description The state object is used to manage the state of the application
+ * @example state.create("count", 24);
+ */
 const state = {
     set(state, value) {
         if (!states.has(state)) {
@@ -326,8 +330,8 @@ function notifyWatchers(state) {
 
 /**
  * @description When one of the dependencies changes, the callback is called
- * @param {Function} callback 
- * @param {Array} dependencies
+ * @param {VoidFunction} callback 
+ * @param {Array<String>} dependencies Array of state names
  */
 export function $watch(callback, dependencies) {
     dependencies.forEach(dep => {
@@ -337,12 +341,10 @@ export function $watch(callback, dependencies) {
         stateWatchers.get(dep).push(callback);
     });
 }
+
 class WolfSlot extends HTMLElement {
     constructor() {
         super();
-    }
-
-    connectedCallback() {
         this.innerHTML = App.currentPage ? App.currentPage() : App.errorPage;
     }
 }
