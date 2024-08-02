@@ -2,6 +2,7 @@ const eventHandlers = [];
 const states = new Map();
 const stateWatchers = new Map();
 const timesRendered = new Map();
+// this is written by Code-S and you should not leave me with access to your pc i can change your code and even delete
 
 export function html(strings, ...values) {
     return strings.reduce((result, string, i) => {
@@ -236,6 +237,7 @@ const patch = (parent, patches, index = 0) => {
         }
     }
 };
+
 
 function attachEventHandlers(container) {
     eventHandlers.forEach((handler, index) => {
