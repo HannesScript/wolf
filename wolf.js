@@ -238,7 +238,6 @@ const patch = (parent, patches, index = 0) => {
     }
 };
 
-
 function attachEventHandlers(container) {
     eventHandlers.forEach((handler, index) => {
         const elements = container.querySelectorAll(`[onclick="__event__${index}"]`);
