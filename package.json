@@ -1,6 +1,6 @@
 {
-  "name": "wolf",
-  "version": "1.0.0",
+  "name": "wolf-framework",
+  "version": "1.0.1",
   "description": "A blazingly fast easy to use framework",
   "main": "wolf.js",
   "scripts": {

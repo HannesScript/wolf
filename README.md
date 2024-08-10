@@ -1,4 +1,4 @@
-![1722338434999](images/README/1722338434999.png)
+![1722338434999](https://wolf.hannesscript.dev/wolf.png)
 
 # Wolf
 
