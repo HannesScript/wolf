@@ -4,7 +4,7 @@ const stateWatchers = new Map();
 const timesRendered = new Map();
 // this is written by Code-S and you should not leave me with access to your pc i can change your code and even delete
 
-export function html(strings, ...values) {
+export function html(strings=[], ...values) {
     return strings.reduce((result, string, i) => {
         const value = values[i];
         if (typeof value === "function") {
@@ -12,8 +12,7 @@ export function html(strings, ...values) {
             return result + string + `__event__${eventHandlers.length - 1}`;
         }
         return result + string + (value !== undefined ? value : "");
-    }, "")
-    .replaceAll("on:", "on")
+    }, "").replaceAll("on:", "on");
 }
 
 export let css = cssString => cssString;
@@ -47,7 +46,9 @@ class Component extends HTMLElement {
     }
 
     connectedCallback() {
-        this.update();
+        if (!this.isConnected) {
+            this.update();
+        }
     }
 
     template() {
@@ -301,6 +302,10 @@ const App = {
         const path = (window.location.hash || "#/").slice(1);
         const routeComponent = this.routes[path];
         this.currentPage = () => routeComponent();
+
+        if(!(this.routes[path])) {
+            this.currentPage = () => this.errorPage;
+        }
 
         const Layout = window.customElements.get(this.layoutComponent);
         this.mountPoint.querySelector("wolf-app").innerHTML = new Layout().innerHTML;
