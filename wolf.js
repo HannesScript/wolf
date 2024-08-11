@@ -82,6 +82,10 @@ const component = (Name, renderFn) => {
                     let propValue = this.getAttribute(propName);
                     if((typeof propValue == "string") && (propValue.toLowerCase() == propValue.toUpperCase())) {
                         propValue = parseInt(propValue, 10);
+                    } else if((typeof propValue == "string") && JSON.parse(propValue)) {
+                        propValue = JSON.parse(propValue);
+                    } else if((typeof propValue == "string") && (propValue === "true" || propValue === "false")) {
+                        propValue = Boolean(propValue);
                     }
                     props[propName] = propValue;
                 }
