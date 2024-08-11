@@ -73,7 +73,21 @@ const component = (Name, renderFn) => {
         }
 
         template() {
-            return renderFn({ ...this.attributes, children: this.children, state: this.state });
+            let props = {};
+
+            let propNames = this.getAttributeNames();
+            if (propNames.length) {
+                for (let i = 0; i < propNames.length; i++) {
+                    let propName = propNames[i];
+                    let propValue = this.getAttribute(propName);
+                    if((typeof propValue == "string") && (propValue.toLowerCase() == propValue.toUpperCase())) {
+                        propValue = parseInt(propValue, 10);
+                    }
+                    props[propName] = propValue;
+                }
+            }
+
+            return renderFn({ ...props, children: this.children, state: this.state });
         }
     }
 

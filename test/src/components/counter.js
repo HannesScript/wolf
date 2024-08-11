@@ -1,7 +1,7 @@
 import { component, html, state } from "../../../wolf.js";
 
-component("counter", () => {
-    state.create("count", 24);
+component("counter", (props) => {
+    state.create("count", props.start || 0);
 
     const increment = () => {
         state.set("count", state.get("count") + 1);

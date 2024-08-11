@@ -1,0 +1,9 @@
+#app {
+    min-height: 100dvh;
+    min-width: 100dvw;
+}
+
+/* Melte extend */
+.bg-gray-950 {
+    background-color: #050505;
+}
