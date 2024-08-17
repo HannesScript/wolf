@@ -7,12 +7,12 @@ component("header", () => {
     return html`
         <style>
             @media screen and (max-width: 768px) {
-                .header > div:nth-child(1) > h1 {
-                    font-size: 2rem !important;
+                .header h1 {
+                    font-size: 2.5rem !important;
                     margin-left: 0rem !important;
                 }
 
-                .header > div:nth-child(1) > img {
+                .header img {
                     height: 4rem !important;
                 }
             }
@@ -26,7 +26,7 @@ component("header", () => {
             </a>
             <nav class="flex align-center gap-2 pt-16 pr-32">
                 <a href="/" class="text-blue-100 line-none" melte-hover="text-blue-300">Home</a>
-                <a href="/doc" class="text-blue-100 line-none" melte-hover="text-blue-300">Docs</a>
+                <a href="/docs" class="text-blue-100 line-none" melte-hover="text-blue-300">Docs</a>
             </nav>
         </div>
     `
