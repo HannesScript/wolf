@@ -1,0 +1,30 @@
+{
+  "name": "@wolf-framework/cli",
+  "version": "0.0.0",
+  "description": "A CLI tool for the [Wolf JS Framework](https://wolf.hannesscript.dev)",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo"
+  },
+  "bin": {
+    "wolf": "main.js"
+  },
+  "keywords": [
+    "Wolf",
+    "Framework",
+    "CLI",
+    "JavaScript"
+  ],
+  "author": "HannesScript",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "chalk-animation": "^2.0.3",
+    "figlet": "^1.7.0",
+    "gradient-string": "^2.0.2",
+    "inquirer": "^10.1.8",
+    "nanospinner": "^1.1.0",
+    "path": "^0.12.7"
+  }
+}
