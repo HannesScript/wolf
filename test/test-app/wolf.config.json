@@ -1,0 +1,5 @@
+{
+    "name": "test-app",
+    "pages_dir": "src/pages",
+    "components_dir": "src/components"
+}

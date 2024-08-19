@@ -13,7 +13,7 @@ component("docs", () => {
             <h2>Getting Started</h2>
             <p>To get up and running with Wolf, run the following commands:</p>
             <pre class="text-orange-300 bg-gray-900 br-8 p-8">
-<code>${"$ npm install -g @wolf-framework/cli"}</code>
+<code>${"$ npm install -g wolf-framework-cli"}</code>
 <code>${"$ wolf new my-wolf-app"}</code>
 <code>${"$ wolf add melte  # Add Melte (<a class=\"text-orange-400\" href=\"https://melte.hannesscript.dev\">https://melte.hannesscript.dev</a>) for easier styling"}</code>
             </pre>
