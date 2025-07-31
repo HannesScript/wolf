@@ -13,7 +13,7 @@
   "dependencies": {
     "chalk": "^5.4.0",
     "chalk-animation": "^2.0.3",
-    "figlet": "^1.8.0",
+    "figlet": "^1.8.1",
     "gradient-string": "^2.0.2",
     "inquirer": "^10.2.0",
     "nanospinner": "^1.1.0"
